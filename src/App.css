@@ -40,3 +40,9 @@
 .read-the-docs {
   color: #888;
 }
+
+.wallet-address {
+  font-family: monospace;
+  word-break: break-all;
+  margin: 1rem 0;
+}
