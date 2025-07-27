@@ -27,8 +27,8 @@ This demo application demonstrates how to integrate the Ribbit Wallet Connect SD
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Ribbit-Nova/ribbit-connect-demo.git
-   cd ribbit-connect-demo
+   git clone https://github.com/Ribbit-Nova/ribbit-wallet-connect-demo.git
+   cd ribbit-wallet-connect-demo
    ```
 
 2. Install dependencies:
@@ -189,4 +189,4 @@ This project is for demonstration purposes. Please refer to the Ribbit Wallet Co
 
 ## 🤝 Contributing
 
-This is a demo application. For SDK improvements or bug reports, please contact the Ribbit team.
+This is a demo application. For SDK improvements or bug reports, please contact the Ribbit team ar support@ribbitwallet.com
