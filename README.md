@@ -27,8 +27,8 @@ This demo application demonstrates how to integrate the Ribbit Wallet Connect SD
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Ribbit-Nova/ribbit-wallet-connect-demo.git
-   cd ribbit-wallet-connect-demo
+   git clone https://github.com/Ribbit-Nova/ribbit-connect-demo.git
+   cd ribbit-connect-demo
    ```
 
 2. Install dependencies:
@@ -152,7 +152,7 @@ npm run type-check
 
 ## 📦 Dependencies
 
-- **ribbit-wallet-connect**: Core SDK for wallet integration
+- **ribbit-connect**: Core SDK for wallet integration
 - **React 18**: UI framework
 - **TypeScript**: Type safety
 - **Vite**: Build tool and development server

@@ -5,11 +5,11 @@ import './App.css';
 import {
   type DappMetadata,
   type ConnectResponse,
-  TransportMessageType,
   type TransactionResponse,
-  SupraChainId,
   type WalletBalanceRequest,
   type TransactionParams,
+  TransportMessageType,
+  SupraChainId
 } from 'ribbit-wallet-connect';
 
 // Extend window object to include ribbit
@@ -22,7 +22,7 @@ declare global {
         params: unknown;
         chainId: number;
       }): Promise<TransactionResponse>;
-      getSessionStatus(): Promise<boolean>;
+      getSessionStatus(): Promise<{success: boolean; message: string;}>;
       getWalletAddress(chainId: number): Promise<string>;
       getWalletBalance(request: WalletBalanceRequest): Promise<string>;
       disconnect(): Promise<void>;
@@ -108,9 +108,10 @@ function App() {
     try {
       addLog('🔍 Checking session status...');
       const isActive = await window.ribbit.getSessionStatus();
-      setIsConnected(isActive);
+      console.log('Session active:', isActive);
+      setIsConnected(isActive.success);
 
-      if (isActive) {
+      if (isActive.success) {
         addLog('✅ Session is active');
       } else {
         addLog('❌ No active session found');
