@@ -64,6 +64,12 @@ function App() {
     init();
   }, []);
 
+  useEffect(() => {
+    const handler = () => checkSessionStatus();
+    window.addEventListener('ribbit-wallet-connected', handler);
+    return () => window.removeEventListener('ribbit-wallet-connected', handler);
+  }, []);
+
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
     setLogs((prev) => [...prev, `${timestamp}: ${message}`]);
@@ -225,8 +231,8 @@ function App() {
         functionName: 'transfer',
         tyArg: ['0x1::supra_coin::SupraCoin'],
         args: [
-          '0x7a752cec6624d4894c2e4d83c53a8c4c8b4c7c9d', // Replace with actual recipient
-          '1000000', // Amount in smallest unit (1 SUPRA = 1000000 microSUPRA)
+          '0xcd57ba74df68ceea6c46b0e30ac77204bd043d1f57b92384c8d42acb9ed63184',
+          '100000000', // Amount in smallest unit (1 SUPRA = 100000000 microSUPRA)
         ],
       };
 
