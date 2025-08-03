@@ -9,20 +9,21 @@ import {
   type WalletBalanceRequest,
   type TransactionParams,
   TransportMessageType,
-  SupraChainId
+  SupraChainId,
 } from 'ribbit-wallet-connect';
 
 // Extend window object to include ribbit
 declare global {
   interface Window {
     ribbit?: {
+      ready: Promise<boolean>;
       connectToWallet(metadata: DappMetadata): Promise<ConnectResponse>;
       sendTransaction(payload: {
         method: TransportMessageType;
         params: unknown;
         chainId: number;
       }): Promise<TransactionResponse>;
-      getSessionStatus(): Promise<{success: boolean; message: string;}>;
+      getSessionStatus(): Promise<{ sessionId: string | null }>;
       getWalletAddress(chainId: number): Promise<string>;
       getWalletBalance(request: WalletBalanceRequest): Promise<string>;
       disconnect(): Promise<void>;
@@ -39,23 +40,35 @@ function App() {
   const [logs, setLogs] = useState<string[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
+  // Check if Ribbit wallet is available
+  useEffect(() => {
+    const init = async () => {
+      if (!window.ribbit) {
+        addLog('❌ Ribbit Wallet SDK not injected.');
+        return;
+      }
+
+      try {
+        const isReady = await window.ribbit.ready;
+        if (isReady) {
+          addLog('🐸 Ribbit Wallet is ready!');
+          checkSessionStatus();
+        } else {
+          addLog('⚠️ Ribbit Wallet is not available.');
+        }
+      } catch (e) {
+        addLog(`❌ Error initializing Ribbit Wallet: ${e}`);
+      }
+    };
+
+    init();
+  }, []);
+
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
     setLogs((prev) => [...prev, `${timestamp}: ${message}`]);
     console.log(message);
   };
-
-  // Check if Ribbit wallet is available
-  useEffect(() => {
-    if (window.ribbit) {
-      addLog('🐸 Ribbit Wallet detected!');
-      checkSessionStatus();
-    } else {
-      addLog(
-        '⚠️ Ribbit Wallet not detected. Please install the Ribbit Wallet extension.'
-      );
-    }
-  }, []);
 
   const connectToWallet = async () => {
     if (!window.ribbit) {
@@ -77,23 +90,24 @@ function App() {
         dappMetadata
       );
 
-      if (response.approved) {
-        setSessionId(response.sessionId || '');
-        setAccounts(response.accounts || []);
-        setChainId(response.chainId || null);
-        setIsConnected(true);
-
-        addLog(`✅ Connected successfully!`);
-        addLog(`📋 Session ID: ${response.sessionId}`);
-        addLog(`👛 Accounts: ${response.accounts?.join(', ')}`);
-        addLog(`🔗 Chain ID: ${response.chainId}`);
-      } else {
+      if (!response || !response?.approved) {
         addLog(
           `❌ Connection rejected: ${
-            response.error || response.message || 'Unknown error'
+            response?.error || response?.message || 'extension not available'
           }`
         );
+        return;
       }
+
+      setSessionId(response.sessionId || '');
+      setAccounts(response.accounts || []);
+      setChainId(response.chainId || null);
+      setIsConnected(true);
+
+      addLog(`✅ Connected successfully!`);
+      addLog(`📋 Session ID: ${response.sessionId}`);
+      addLog(`👛 Accounts: ${response.accounts?.join(', ')}`);
+      addLog(`🔗 Chain ID: ${response.chainId}`);
     } catch (error) {
       addLog(`❌ Connection failed: ${error}`);
     }
@@ -107,17 +121,50 @@ function App() {
 
     try {
       addLog('🔍 Checking session status...');
-      const isActive = await window.ribbit.getSessionStatus();
-      console.log('Session active:', isActive);
-      setIsConnected(isActive.success);
-
-      if (isActive.success) {
+      const session = await window.ribbit.getSessionStatus();
+      if (!session) {
+        addLog('❌ No active session found');
+        setIsConnected(false);
+      } else if (session.sessionId === null) {
+        setIsConnected(false);
+        addLog('❌ No active session found');
+      } else if (session.sessionId === '') {
+        setIsConnected(false);
+        addLog('❌ No active session found');
+      } else if (session.sessionId === undefined) {
+        setIsConnected(false);
+        addLog('❌ No active session found');
+      } else if (session.sessionId === 'null') {
+        setIsConnected(false);
+        addLog('❌ No active session found');
+      } else if (session.sessionId === 'undefined') {
+        setIsConnected(false);
+        addLog('❌ No active session found');
+      } else if (session.sessionId === '0') {
+        setIsConnected(false);
+        addLog('❌ No active session found');
+      } else if (session.sessionId === 'false') {
+        setIsConnected(false);
+        addLog('❌ No active session found');
+      } else if (session.sessionId === 'true') {
+        setIsConnected(false);
+        addLog('❌ No active session found');
+      } else if (session.sessionId === 'NaN') {
+        setIsConnected(false);
+        addLog('❌ No active session found');
+      } else if (!session?.sessionId) {
+        setIsConnected(false);
+        addLog('❌ No active session found');
+      } else if (session.sessionId) {
+        setIsConnected(true);
         addLog('✅ Session is active');
       } else {
+        setIsConnected(false);
         addLog('❌ No active session found');
       }
     } catch (error) {
       addLog(`❌ Failed to check session status: ${error}`);
+      setIsConnected(false);
     }
   };
 
@@ -150,7 +197,7 @@ function App() {
       const walletBalanceRequest: WalletBalanceRequest = {
         chainId: SupraChainId.TESTNET,
         resourceType: '0x1::supra_coin::SupraCoin',
-        decimals: 7, // 1 SUPRA = 10^7 microSUPRA
+        decimals: 8, // 1 SUPRA = 10^7 microSUPRA
       };
       const balance = await window.ribbit.getWalletBalance(
         walletBalanceRequest
@@ -355,10 +402,10 @@ function App() {
               <h4>Chain IDs</h4>
               <ul>
                 <li>
-                  Supra Testnet: <code>6</code>
+                  Supra Testnet: <code>{SupraChainId.TESTNET}</code>
                 </li>
                 <li>
-                  Supra Mainnet: <code>8</code>
+                  Supra Mainnet: <code>{SupraChainId.MAINNET}</code>
                 </li>
               </ul>
             </div>
