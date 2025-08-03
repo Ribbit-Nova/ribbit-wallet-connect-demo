@@ -196,8 +196,8 @@ function App() {
       addLog('💰 Getting wallet balance...');
       const walletBalanceRequest: WalletBalanceRequest = {
         chainId: SupraChainId.TESTNET,
-        resourceType: '0x1::supra_coin::SupraCoin',
-        decimals: 8, // 1 SUPRA = 10^7 microSUPRA
+        resourceType: '<0x1::supra_coin::SupraCoin>',
+        decimals: 8, // 1 SUPRA = 10^8 microSUPRA
       };
       const balance = await window.ribbit.getWalletBalance(
         walletBalanceRequest
