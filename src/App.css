@@ -41,8 +41,13 @@
   color: #888;
 }
 
-.wallet-address {
+.wallet-data {
   font-family: monospace;
+  word-break: break-all;
+  margin: 1rem 0;
+}
+
+.log-entry {
   word-break: break-all;
   margin: 1rem 0;
 }

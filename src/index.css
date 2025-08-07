@@ -26,13 +26,19 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-direction: column;
 }
 
 button {
@@ -54,6 +60,59 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.docs-grid {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Each doc-item card */
+.doc-item {
+  background: #f8fafc;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  padding: 1.5rem 1.25rem;
+  min-width: 400px;
+  flex: 1 1 400px;
+}
+
+.doc-item h4 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+  color: #2563eb;
+  letter-spacing: 0.01em;
+}
+
+/* Modern list style */
+.doc-item ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.doc-item li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1rem;
+}
+
+.doc-item li:last-child {
+  border-bottom: none;
+}
+
+.doc-item code {
+  background: #e0e7ef;
+  border-radius: 6px;
+  padding: 0.15em 0.5em;
+  font-size: 0.97em;
+  color: #334155;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -64,5 +123,14 @@ button:focus-visible {
   }
   button {
     background-color: #f9f9f9;
+  }
+}
+
+@media screen and (min-width: 600px) {
+  .button-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin: 1rem 0;
   }
 }

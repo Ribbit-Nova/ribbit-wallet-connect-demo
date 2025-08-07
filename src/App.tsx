@@ -4,12 +4,15 @@ import './App.css';
 // Import types from ribbit-connect package
 import {
   type DappMetadata,
-  type ConnectResponse,
-  type TransactionResponse,
+  type RawTransactionRequest,
   type WalletBalanceRequest,
-  type TransactionParams,
-  TransportMessageType,
+  type RawTransactionResponse,
+  type SignMessageRequest,
+  type SignMessageResponse,
+  type RawTxnRequest,
+  type ConnectResponse,
   SupraChainId,
+  BCS,
 } from 'ribbit-wallet-connect';
 
 // Extend window object to include ribbit
@@ -18,14 +21,14 @@ declare global {
     ribbit?: {
       ready: Promise<boolean>;
       connectToWallet(metadata: DappMetadata): Promise<ConnectResponse>;
-      sendTransaction(payload: {
-        method: TransportMessageType;
-        params: unknown;
-        chainId: number;
-      }): Promise<TransactionResponse>;
+      signAndSendRawTransaction(
+        payload: RawTransactionRequest
+      ): Promise<RawTransactionResponse>;
+      signMessage(payload: SignMessageRequest): Promise<SignMessageResponse>;
       getSessionStatus(): Promise<{ sessionId: string | null }>;
       getWalletAddress(chainId: number): Promise<string>;
       getWalletBalance(request: WalletBalanceRequest): Promise<string>;
+      createRawTransactionBuffer(request: RawTxnRequest): Promise<string>;
       disconnect(): Promise<void>;
     };
   }
@@ -96,7 +99,7 @@ function App() {
         dappMetadata
       );
 
-      if (!response || !response?.approved) {
+      if (!response || !response?.sessionId) {
         addLog(
           `❌ Connection rejected: ${
             response?.error || response?.message || 'extension not available'
@@ -112,8 +115,6 @@ function App() {
 
       addLog(`✅ Connected successfully!`);
       addLog(`📋 Session ID: ${response.sessionId}`);
-      addLog(`👛 Accounts: ${response.accounts?.join(', ')}`);
-      addLog(`🔗 Chain ID: ${response.chainId}`);
     } catch (error) {
       addLog(`❌ Connection failed: ${error}`);
     }
@@ -215,6 +216,43 @@ function App() {
     }
   };
 
+  const signMessage = async (message: string, nonce: number) => {
+    if (!window.ribbit || !isConnected) {
+      addLog('❌ ERROR: Not connected to wallet');
+      return;
+    }
+
+    try {
+      addLog('📝 Signing message...');
+      const response = await window.ribbit.signMessage({
+        message: `${message} at ${nonce}`,
+        nonce: nonce,
+        chainId: SupraChainId.TESTNET,
+      });
+      if (response.approved) {
+        addLog(`✅ Message signed successfully!`);
+        addLog(`🎯 Result: ${JSON.stringify(response)}`);
+      } else {
+        addLog(
+          `❌ Message signing rejected: ${response.error || 'Unknown error'}`
+        );
+      }
+    } catch (error) {
+      addLog(`❌ Message signing failed: ${error}`);
+    }
+  };
+
+  const getSequenceNumber = async (address: string): Promise<number> => {
+    const data = await fetch(
+      `https://rpc-testnet.supra.com/rpc/v1/accounts/${address}`
+    );
+    if (!data.ok) {
+      throw new Error(`Failed to fetch sequence number for ${address}`);
+    }
+    const accountData = await data.json();
+    return accountData.sequence_number;
+  };
+
   const sendTransaction = async () => {
     if (!window.ribbit || !isConnected) {
       addLog('❌ ERROR: Not connected to wallet');
@@ -222,34 +260,50 @@ function App() {
     }
 
     try {
-      addLog('📝 Preparing transaction...');
-
-      // Example transaction payload for Supra token transfer
-      const transactionPayload: TransactionParams = {
-        moduleAddress: '0x1',
-        moduleName: 'supra_coin',
-        functionName: 'transfer',
-        tyArg: ['0x1::supra_coin::SupraCoin'],
-        args: [
-          '0xcd57ba74df68ceea6c46b0e30ac77204bd043d1f57b92384c8d42acb9ed63184',
-          '100000000', // Amount in smallest unit (1 SUPRA = 100000000 microSUPRA)
-        ],
-      };
-
-      addLog('🚀 Sending transaction...');
-      const response: TransactionResponse = await window.ribbit.sendTransaction(
-        {
-          method: TransportMessageType.SEND_TRANSACTION,
-          params: transactionPayload,
-          chainId: SupraChainId.TESTNET,
-        }
+      const selectedWalletAddress = await window.ribbit.getWalletAddress(
+        SupraChainId.TESTNET
       );
+      const sequenceNumber = await getSequenceNumber(selectedWalletAddress);
+      const maxGasAmount = 5000;
+      const gasUnitPrice = 100;
+      const chainId = SupraChainId.TESTNET;
+      const receiver = BCS.bcsSerializeAddress(
+        '0xcd57ba74df68ceea6c46b0e30ac77204bd043d1f57b92384c8d42acb9ed63184'
+      );
+      const amount = BCS.bcsSerializeU64(BigInt(100000000)); // 1 SUPRA = 100,000,000 microSUPRA
+      const tokenType = BCS.typeTagStruct('0x1::supra_coin::SupraCoin');
+
+      const rawTxnBase64 = await window.ribbit.createRawTransactionBuffer({
+        sender: selectedWalletAddress,
+        sequenceNumber,
+        moduleAddress:
+          '0x4feceed8187cde99299ba0ad418412a7d84e54b70bdc4efe756067ca0c3f9c9a',
+        moduleName: 'token',
+        functionName: 'send',
+        typeArgs: [tokenType],
+        args: [receiver, amount],
+        maxGasAmount,
+        gasUnitPrice,
+        expirationTimestampSecs: Math.floor(Date.now() / 1000) + 300,
+        chainId,
+      });
+
+      console.log('Raw Transaction from website:', rawTxnBase64);
+
+      // Send to wallet
+      const response: RawTransactionResponse =
+        await window.ribbit.signAndSendRawTransaction({
+          rawTxn: rawTxnBase64,
+          chainId,
+          meta: {
+            description: 'Send tokens',
+          },
+        });
 
       if (response.approved) {
-        addLog(`✅ Transaction sent successfully!`);
-        addLog(`🎯 Result: ${JSON.stringify(response.result)}`);
+        addLog(`✅ Transaction sent! Hash: ${response.txHash}`);
       } else {
-        addLog(`❌ Transaction rejected: ${response.error || 'Unknown error'}`);
+        addLog(`❌ Transaction rejected: ${response.error}`);
       }
     } catch (error) {
       addLog(`❌ Transaction failed: ${error}`);
@@ -286,9 +340,9 @@ function App() {
   };
 
   return (
-    <div className="App">
+    <div className="app">
       <header className="App-header">
-        <h1>🐸 Ribbit Connect SDK Demo</h1>
+        <h3>🐸 Ribbit Connect SDK Demo</h3>
         <p>
           Demo application showcasing the Ribbit Wallet Connect SDK integration
         </p>
@@ -368,6 +422,16 @@ function App() {
             </button>
 
             <button
+              onClick={() =>
+                signMessage('Sign to login at', new Date().getTime())
+              }
+              className="demo-button info"
+              disabled={!isConnected}
+            >
+              📝 Sign message
+            </button>
+
+            <button
               onClick={getWalletBalance}
               className="demo-button info"
               disabled={!isConnected}
@@ -422,7 +486,13 @@ function App() {
                   <code>window.ribbit.connectToWallet()</code>
                 </li>
                 <li>
-                  <code>window.ribbit.sendTransaction()</code>
+                  <code>window.ribbit.getWalletAddress()</code>
+                </li>
+                <li>
+                  <code>window.ribbit.createRawTransaction()</code>
+                </li>
+                <li>
+                  <code>window.ribbit.signAndSendRawTransaction()</code>
                 </li>
                 <li>
                   <code>window.ribbit.getSessionStatus()</code>
