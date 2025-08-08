@@ -1,192 +1,441 @@
-# 🐸 Ribbit Wallet Connect Demo
+<div align="center">
+  <h1>🐸 Ribbit Wallet Connect Demo</h1>
+  <p><strong>A comprehensive demo application showcasing the integration of Ribbit Wallet Connect SDK</strong></p>
+  
+  [![React](https://img.shields.io/badge/React-18.x-blue?logo=react)](https://reactjs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)](https://www.typescriptlang.org/)
+  [![Vite](https://img.shields.io/badge/Vite-7.x-purple?logo=vite)](https://vitejs.dev/)
+  [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+</div>
 
-A comprehensive demo application showcasing the integration of Ribbit Wallet Connect SDK with React + TypeScript + Vite.
+---
 
 ## 📋 Overview
 
-This demo application demonstrates how to integrate the Ribbit Wallet Connect SDK into a web application, providing examples of wallet connection, transaction handling, and wallet information retrieval on the Supra blockchain.
+This demo application demonstrates how to integrate the **Ribbit Wallet Connect SDK** into a modern web application. Built with React, TypeScript, and Vite, it provides comprehensive examples of wallet connection, transaction handling, and wallet information retrieval on the Supra blockchain.
 
-## ✨ Features
+## ✨ Key Features
 
-- **Wallet Connection**: Connect to Ribbit Wallet extension
-- **Session Management**: Check connection status and maintain sessions
-- **Wallet Information**: Retrieve wallet address and balance
-- **Transaction Handling**: Send transactions on Supra blockchain
-- **Real-time Logging**: Activity logs with timestamps
-- **Chain Support**: Supra Testnet and Mainnet support
+| Feature | Description |
+|---------|-------------|
+| 🔗 **Wallet Connection** | Seamless connection to Ribbit Wallet extension |
+| 📊 **Session Management** | Real-time connection status and session persistence |
+| 💼 **Wallet Information** | Retrieve wallet address and token balances |
+| 🔐 **Message Signing** | Cryptographic message signing capabilities |
+| 💸 **Transaction Handling** | Send transactions on Supra blockchain |
+| 📝 **Activity Logging** | Real-time activity logs with timestamps |
+| 🌐 **Multi-Chain Support** | Supra Testnet and Mainnet compatibility |
 
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- Ribbit Wallet browser extension installed
-- Modern web browser
+Before you begin, ensure you have the following installed:
+
+- **Node.js** (v16 or higher)
+- **npm** or **yarn** package manager
+- **Ribbit Wallet** browser extension
+- Modern web browser (Chrome, Firefox, Safari, Edge)
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone the repository**
    ```bash
    git clone https://github.com/Ribbit-Nova/ribbit-wallet-connect-demo.git
    cd ribbit-wallet-connect-demo
    ```
 
-2. Install dependencies:
+2. **Install dependencies**
    ```bash
    npm install
+   # or
+   yarn install
    ```
 
-3. Start the development server:
+3. **Start development server**
    ```bash
    npm run dev
+   # or
+   yarn dev
    ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+4. **Open in browser**
+   Navigate to `http://localhost:5173`
 
-## 🔧 Usage
+## 🎯 Usage Guide
 
-### 1. Connect to Wallet
+### 1. 🔗 Wallet Connection
 
-Click "Connect Wallet" to establish a connection with the Ribbit Wallet extension. This will prompt the user to approve the connection.
-
-### 2. Check Session Status
-
-Verify if an active session exists with the wallet.
-
-### 3. Get Wallet Information
-
-- **Get Address**: Retrieve the current wallet address
-- **Get Balance**: Fetch the wallet balance in SUPRA tokens
-
-### 4. Send Transactions
-
-Send transactions on the Supra blockchain (configured for token transfers in the demo).
-
-### 5. Disconnect
-
-Safely disconnect from the wallet and clear session data.
-
-## 🌐 Supported Networks
-
-- **Supra Testnet**: Chain ID `6`
-- **Supra Mainnet**: Chain ID `8`
-
-## 📚 API Reference
-
-### Core Methods
-
-#### `window.ribbit.connectToWallet(metadata: DappMetadata)`
-
-Establishes connection with the Ribbit Wallet.
+Initialize connection with the Ribbit Wallet extension:
 
 ```typescript
 const dappMetadata: DappMetadata = {
-    name: 'Your DApp Name',
-    description: 'Your DApp Description',
-    logo: 'https://your-domain.com/logo.png',
-    url: 'https://your-domain.com'
+  name: 'Your DApp Name',
+  description: 'Your DApp Description',
+  logo: 'https://your-domain.com/logo.png',
+  url: 'https://your-domain.com'
 };
+
+const response = await window.ribbit.connectToWallet(dappMetadata);
 ```
 
-#### `window.ribbit.getSessionStatus()`
+### 2. 📊 Session Management
 
-Checks if an active session exists.
-
-#### `window.ribbit.getWalletAddress(chainId: number)`
-
-Retrieves the wallet address for the specified chain.
-
-#### `window.ribbit.getWalletBalance(request: WalletBalanceRequest)`
-
-Gets the wallet balance for a specific token.
+Check active session status:
 
 ```typescript
-const request: WalletBalanceRequest = {
+const session = await window.ribbit.getSessionStatus();
+if (session?.success) {
+  console.log('Connection is active');
+} else {
+  console.log('No active connection');
+}
+```
+
+### 3. 💼 Wallet Information
+
+**Get Wallet Address**
+```typescript
+try {
+  const address = await window.ribbit.getWalletAddress(SupraChainId.TESTNET);
+  console.log('Wallet address:', address);
+} catch (error) {
+  console.error('Failed to get wallet address:', error);
+}
+```
+
+**Get Wallet Balance**
+```typescript
+try {
+  const walletBalanceRequest: WalletBalanceRequest = {
     chainId: SupraChainId.TESTNET,
     resourceType: '0x1::supra_coin::SupraCoin',
     decimals: 7
-};
+  };
+  const balance = await window.ribbit.getWalletBalance(walletBalanceRequest);
+  console.log('Wallet balance:', balance);
+} catch (error) {
+  console.error('Failed to get wallet balance:', error);
+}
 ```
 
-#### `window.ribbit.sendTransaction(payload)`
+### 4. 🔐 Message Signing
 
-Sends a transaction to the blockchain.
+Sign messages for authentication or verification:
 
 ```typescript
-const payload = {
-    method: TransportMessageType.SEND_TRANSACTION,
-    params: {
-        moduleAddress: '0x1',
-        moduleName: 'supra_coin',
-        functionName: 'transfer',
-        tyArg: ['0x1::supra_coin::SupraCoin'],
-        args: [recipientAddress, amount]
+try {
+  const response = await window.ribbit.signMessage({
+    message: 'Sign to authenticate',
+    nonce: new Date().getTime(),
+    chainId: SupraChainId.TESTNET,
+  });
+
+  if (response.approved) {
+    console.log('Message signed successfully:', response);
+  } else {
+    console.log('Message signing rejected:', response.error);
+  }
+} catch (error) {
+  console.error('Message signing failed:', error);
+}
+```
+
+### 5. 💸 Transaction Handling
+
+**Prepare Raw Transaction**
+```typescript
+import { BCS, type RawTxnRequest, type RawTransactionResponse } from 'ribbit-wallet-connect';
+
+const receiver = BCS.bcsSerializeAddress('0x1234577898sdjbcws98y9......');
+const amount = BCS.bcsSerializeU64(BigInt(100000000)); // 1 SUPRA = 100,000,000 microSUPRA
+const tokenType = BCS.typeTagStruct('0x1::supra_coin::SupraCoin');
+
+const transactionPayload: RawTxnRequest = {
+  sender: selectedWalletAddress,
+  sequenceNumber,
+  moduleAddress: '0x1234578899999.........',
+  moduleName: 'module name',
+  functionName: 'function name',
+  typeArgs: [tokenType],
+  args: [receiver, amount],
+  maxGasAmount: BigInt(5000),
+  gasUnitPrice: BigInt(1),
+  expirationTimestampSecs: Math.floor(Date.now() / 1000) + 300,
+  chainId,
+};
+
+const rawTransactionBase64 = window.ribbit.createRawTransactionBuffer(transactionPayload);
+```
+
+**Send Transaction**
+```typescript
+try {
+  const response: RawTransactionResponse = await window.ribbit.sendTransaction({
+    rawTxn: rawTxnBase64,
+    chainId,
+    meta: {
+      description: 'Send tokens',
     },
-    chainId: SupraChainId.TESTNET
+  });
+
+  if (response.approved) {
+    console.log('Transaction sent successfully:', response.result);
+  } else {
+    console.error('Transaction rejected:', response.error);
+  }
+} catch (error) {
+  console.error('Transaction failed:', error);
+}
+```
+
+### 6. 🔌 Disconnect
+
+Safely disconnect from the wallet:
+
+```typescript
+try {
+  await window.ribbit.disconnect();
+  console.log('Disconnected successfully');
+} catch (error) {
+  console.error('Failed to disconnect:', error);
+}
+```
+
+## 🌐 Supported Networks
+
+| Network | Chain ID | Description |
+|---------|----------|-------------|
+| **Supra Testnet** | `6` | Development and testing environment |
+| **Supra Mainnet** | `8` | Production blockchain network |
+
+### Chain Configuration
+
+```typescript
+const SUPRA_CHAINS = {
+  TESTNET: {
+    chainId: 6,
+    name: 'Supra Testnet',
+    nativeCurrency: {
+      name: 'SUPRA',
+      symbol: 'SUPRA',
+      decimals: 7
+    }
+  },
+  MAINNET: {
+    chainId: 8,
+    name: 'Supra Mainnet',
+    nativeCurrency: {
+      name: 'SUPRA',
+      symbol: 'SUPRA',
+      decimals: 7
+    }
+  }
 };
 ```
 
-#### `window.ribbit.disconnect()`
+## 📚 API Reference
 
-Disconnects from the wallet and clears session data.
+### Core Interface
+
+```typescript
+interface Window {
+  ribbit?: {
+    connectToWallet(metadata: DappMetadata): Promise<ConnectResponse>;
+    getSessionStatus(): Promise<{success: boolean; message: string;}>;
+    getWalletAddress(chainId: number): Promise<string>;
+    getWalletBalance(request: WalletBalanceRequest): Promise<string>;
+    signMessage(payload: SignMessagePayload): Promise<SignMessageResponse>;
+    sendTransaction(payload: TransactionPayload): Promise<TransactionResponse>;
+    disconnect(): Promise<void>;
+  };
+}
+```
+
+### Type Definitions
+
+```typescript
+interface DappMetadata {
+  name: string;
+  description: string;
+  logo: string;
+  url: string;
+}
+
+interface ConnectResponse {
+  approved: boolean;
+  sessionId?: string;
+  accounts?: string[];
+  chainId?: number;
+  error?: string;
+  message?: string;
+}
+
+interface WalletBalanceRequest {
+  chainId: number;
+  resourceType: string;
+  decimals: number;
+}
+```
 
 ## 🛠 Development
 
-### Build for Production
+### Available Scripts
 
-```bash
-npm run build
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm run preview` | Preview production build |
+| `npm run lint` | Run ESLint |
+| `npm run type-check` | Run TypeScript compiler |
+
+### Project Structure
+
+```
+ribbit-wallet-connect-demo/
+├── src/
+│   ├── components/     # React components
+│   ├── types/         # TypeScript type definitions
+│   ├── utils/         # Utility functions
+│   └── App.tsx        # Main application component
+├── public/            # Static assets
+├── docs/             # Documentation
+└── package.json      # Project configuration
 ```
 
-### Lint Code
+## 📦 Tech Stack
 
-```bash
-npm run lint
-```
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **React** | 18.x | UI Framework |
+| **TypeScript** | 5.x | Type Safety |
+| **Vite** | 7.x | Build Tool & Dev Server |
+| **Ribbit Connect** | Latest | Wallet Integration SDK |
 
-### Type Checking
+## 🔗 Blockchain Information
 
-```bash
-npm run type-check
-```
+### Supra Blockchain Details
 
-## 📦 Dependencies
-
-- **ribbit-connect**: Core SDK for wallet integration
-- **React 18**: UI framework
-- **TypeScript**: Type safety
-- **Vite**: Build tool and development server
-
-## 🔗 Chain Information
-
-### Supra Blockchain
-
-- **Testnet Chain ID**: 6
-- **Mainnet Chain ID**: 8
 - **Native Token**: SUPRA
 - **Decimals**: 7 (1 SUPRA = 10^7 microSUPRA)
+- **Block Time**: ~1 second
+- **Consensus**: AptosBFT
+
+### Token Standards
+
+| Standard | Description | Example |
+|----------|-------------|---------|
+| **Coin** | Native fungible tokens | `0x1::supra_coin::SupraCoin` |
+| **Token** | Custom fungible tokens | `0x1::managed_coin::ManagedCoin` |
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **"Ribbit Wallet not detected"**
-   - Ensure the Ribbit Wallet browser extension is installed and enabled
-   - Refresh the page after installing the extension
+<details>
+<summary><strong>❌ "Ribbit Wallet not detected"</strong></summary>
 
-2. **Connection Rejected**
-   - Check that you're approving the connection in the wallet popup
-   - Verify the DApp metadata is correctly configured
+**Solutions:**
+- Install the Ribbit Wallet browser extension
+- Refresh the page after installation
+- Check if the extension is enabled
+- Try opening in an incognito/private window
+</details>
 
-3. **Transaction Failed**
-   - Ensure you have sufficient balance for the transaction
-   - Verify the recipient address is valid
-   - Check that you're connected to the correct network
+<details>
+<summary><strong>❌ Connection Rejected</strong></summary>
+
+**Solutions:**
+- Ensure you approve the connection in the wallet popup
+- Verify DApp metadata is correctly configured
+- Check if popup was blocked by browser
+- Try disconnecting and reconnecting
+</details>
+
+<details>
+<summary><strong>❌ Transaction Failed</strong></summary>
+
+**Solutions:**
+- Verify sufficient balance for transaction + gas fees
+- Check that recipient address is valid
+- Ensure you're connected to the correct network
+- Verify transaction parameters are correct
+</details>
+
+<details>
+<summary><strong>❌ Import/Export Errors</strong></summary>
+
+**Solutions:**
+- Check if all required dependencies are installed
+- Verify import paths are correct
+- Try restarting the development server
+- Clear node_modules and reinstall dependencies
+</details>
+
+## 📈 Performance Tips
+
+1. **Optimize Bundle Size**
+   - Use dynamic imports for large dependencies
+   - Implement code splitting for better load times
+
+2. **Connection Management**
+   - Cache connection status to avoid repeated API calls
+   - Implement connection retry logic with exponential backoff
+
+3. **Error Handling**
+   - Always wrap wallet interactions in try-catch blocks
+   - Provide meaningful error messages to users
+
+## 🔒 Security Best Practices
+
+- ✅ Always validate user inputs
+- ✅ Implement proper error handling
+- ✅ Never store private keys in frontend
+- ✅ Use HTTPS in production
+- ✅ Validate transaction parameters
+- ✅ Implement rate limiting for API calls
 
 ## 📄 License
 
-This project is for demonstration purposes. Please refer to the Ribbit Wallet Connect SDK license for usage terms.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🤝 Contributing
 
-This is a demo application. For SDK improvements or bug reports, please contact the Ribbit team ar support@ribbitwallet.com
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📞 Support
+
+For technical support and questions:
+
+- **Email**: [support@ribbitwallet.com](mailto:support@ribbitwallet.com)
+- **Documentation**: [Ribbit Wallet Docs](https://docs.ribbitwallet.com)
+- **Discord**: [Join our community](https://discord.gg/ribbitwallet)
+- **GitHub Issues**: [Report bugs](https://github.com/Ribbit-Nova/ribbit-wallet-connect-demo/issues)
+
+## 🙏 Acknowledgments
+
+- Supra Foundation for blockchain infrastructure
+- React team for the amazing framework
+- Vite team for the lightning-fast build tool
+- TypeScript team for type safety
+
+---
+
+<div align="center">
+  <p><strong>Built with ❤️ by the Ribbit Team</strong></p>
+  <p>
+    <a href="https://ribbitwallet.com">Website</a> •
+    <a href="https://docs.ribbitwallet.com">Documentation</a> •
+    <a href="https://twitter.com/ribbitwallet">Twitter</a> •
+    <a href="https://discord.gg/ribbitwallet">Discord</a>
+  </p>
+</div>
