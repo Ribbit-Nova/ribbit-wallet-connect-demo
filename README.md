@@ -417,9 +417,7 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 For technical support and questions:
 
 - **Email**: [support@ribbitwallet.com](mailto:support@ribbitwallet.com)
-- **Documentation**: [Ribbit Wallet Docs](https://docs.ribbitwallet.com)
-- **Discord**: [Join our community](https://discord.gg/ribbitwallet)
-- **GitHub Issues**: [Report bugs](https://github.com/Ribbit-Nova/ribbit-wallet-connect-demo/issues)
+- **Discord**: [Join our community](https://discord.com/invite/PQ96y6S9aS)
 
 ## 🙏 Acknowledgments
 
@@ -433,9 +431,8 @@ For technical support and questions:
 <div align="center">
   <p><strong>Built with ❤️ by the Ribbit Team</strong></p>
   <p>
-    <a href="https://ribbitwallet.com">Website</a> •
-    <a href="https://docs.ribbitwallet.com">Documentation</a> •
-    <a href="https://twitter.com/ribbitwallet">Twitter</a> •
-    <a href="https://discord.gg/ribbitwallet">Discord</a>
+    <a href="https://ribbitwallet.com">Website</a> 
+    <a href="https://x.com/ribbitwallet">Twitter</a> •
+    <a href="https://discord.com/invite/PQ96y6S9aS">Discord</a>
   </p>
 </div>
