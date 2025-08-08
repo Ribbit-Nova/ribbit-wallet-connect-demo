@@ -431,7 +431,7 @@ For technical support and questions:
 <div align="center">
   <p><strong>Built with ❤️ by the Ribbit Team</strong></p>
   <p>
-    <a href="https://ribbitwallet.com">Website</a> 
+    <a href="https://ribbitwallet.com">Website</a> •
     <a href="https://x.com/ribbitwallet">Twitter</a> •
     <a href="https://discord.com/invite/PQ96y6S9aS">Discord</a>
   </p>
