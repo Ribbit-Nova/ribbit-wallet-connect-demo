@@ -134,13 +134,41 @@ const Ribbit = () => {
   };
 
   const getSequenceNumber = async (address: string): Promise<number> => {
-    const data = await fetch(
+    if (!address) {
+      throw new Error('Invalid address passed to getSequenceNumber');
+    }
+
+    const res = await fetch(
       `https://rpc-testnet.supra.com/rpc/v1/accounts/${address}`
     );
-    if (!data.ok) {
-      throw new Error(`Failed to fetch sequence number for ${address}`);
+
+    const text = await res.text(); // read raw text for better diagnostics
+    let accountData: any = null;
+    try {
+      accountData = text ? JSON.parse(text) : null;
+    } catch (err) {
+      throw new Error(
+        `Failed to parse JSON for sequence number (address=${address}): ${text}`
+      );
     }
-    const accountData = await data.json();
+
+    if (!res.ok) {
+      throw new Error(
+        `Failed to fetch sequence number for ${address}: ${res.status} ${res.statusText} - ${text}`
+      );
+    }
+
+    if (
+      !accountData ||
+      typeof accountData.sequence_number === 'undefined' ||
+      accountData.sequence_number === null
+    ) {
+      throw new Error(
+        `No sequence_number in response for ${address}: ${JSON.stringify(
+          accountData
+        )}`
+      );
+    }
     return accountData.sequence_number;
   };
 
@@ -177,7 +205,9 @@ const Ribbit = () => {
         return;
       }
       addLog('🚀 Sending transaction...');
+      addLog('Getting sequenceNumber...');
       const sequenceNumber = await getSequenceNumber(wallet?.walletAddress);
+      addLog(`Sequence Number... ${sequenceNumber}`);
       const maxGasAmount = 5000;
       const gasUnitPrice = 100;
       const chainId = SupraChainId.TESTNET;
