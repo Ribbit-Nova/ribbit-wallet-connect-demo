@@ -236,7 +236,7 @@ const Ribbit = () => {
 
     try {
       addLog('🔌 Disconnecting...');
-      await sdk?.disconnectWallet();
+      await sdk?.disconnect();
 
       // Reset state
       setWallet(null);
