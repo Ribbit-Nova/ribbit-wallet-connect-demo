@@ -186,8 +186,9 @@ const Ribbit = () => {
         decimals: 8, // 1 SUPRA = 10^8 microSUPRA
       };
       const balance = await sdk.getWalletBalance(walletBalanceRequest);
-      setWalletBalance(balance);
-      addLog(`✅ Wallet balance: ${balance} SUPRA`);
+      console.log(balance);
+      setWalletBalance(balance.balance);
+      addLog(`✅ Wallet balance: ${balance.balance} SUPRA`);
     } catch (error) {
       addLog(`❌ Failed to get wallet balance: ${error}`);
     }
@@ -267,7 +268,6 @@ const Ribbit = () => {
     try {
       addLog('🔌 Disconnecting...');
       await sdk?.disconnect();
-
       // Reset state
       setWallet(null);
       setChainId(null);
