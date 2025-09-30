@@ -12,7 +12,10 @@ import {
   type WalletInfo,
   initSdk,
   type RibbitWalletSDK,
+  RawTxnFormat,
 } from 'ribbit-wallet-connect';
+
+import { BCS as BCSSupra, HexString } from 'supra-l1-sdk-core';
 
 const Ribbit = () => {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
@@ -155,7 +158,7 @@ const Ribbit = () => {
     }
   };
 
-  const sendTransaction = async () => {
+  const sendTransactionWithSupra = async () => {
     if (!sdk || !isConnected) {
       addLog('❌ ERROR: Not connected to wallet');
       return;
@@ -168,11 +171,11 @@ const Ribbit = () => {
       }
       addLog('🚀 Sending transaction...');
       const chainId = SupraChainId.TESTNET;
-      const receiver = BCS.bcsSerializeAddress(
+      const receiver = new HexString(
         '0xcd57ba74df68ceea6c46b0e30ac77204bd043d1f57b92384c8d42acb9ed63184'
-      );
-      const amount = BCS.bcsSerializeU64(BigInt(100000000)); // 1 SUPRA = 100,000,000 microSUPRA
-      const tokenType = BCS.typeTagStruct('0x1::supra_coin::SupraCoin');
+      ).toUint8Array();
+      const amount = BCSSupra.bcsSerializeUint64(BigInt(100000000)); // 1 SUPRA = 100,000,000 microSUPRA
+      const tokenType = '0x1::supra_coin::SupraCoin';
 
       const rawTxnRequest: RawTxnRequest = {
         sender: wallet?.walletAddress,
@@ -196,6 +199,66 @@ const Ribbit = () => {
         await sdk.signAndSendRawTransaction({
           rawTxn: rawTxnBase64,
           chainId,
+          format: RawTxnFormat.supra,
+          meta: {
+            description: 'Send tokens',
+          },
+        });
+
+      if (response.approved) {
+        addLog(`✅ Transaction sent! Hash: ${response.txHash}`);
+      } else {
+        addLog(`❌ Transaction rejected: ${response.error}`);
+      }
+    } catch (error) {
+      addLog(`❌ Transaction failed: ${error}`);
+    }
+  };
+
+  const sendTransaction = async () => {
+    if (!sdk || !isConnected) {
+      addLog('❌ ERROR: Not connected to wallet');
+      return;
+    }
+
+    try {
+      if (!sdk || !wallet) {
+        addLog('❌ ERROR: Not connected to wallet');
+        return;
+      }
+      addLog('🚀 Sending transaction...');
+      const chainId = SupraChainId.TESTNET;
+      const receiver = BCS.bcsSerializeAddress(
+        '0xcd57ba74df68ceea6c46b0e30ac77204bd043d1f57b92384c8d42acb9ed63184'
+      );
+      const amount = BCS.bcsSerializeU64(BigInt(100000000)); // 1 SUPRA = 100,000,000 microSUPRA
+      const tokenType = '0x1::supra_coin::SupraCoin';
+      // const tokenType = BCS.typeTagStruct('0x1::supra_coin::SupraCoin');
+
+      const rawTxnRequest: RawTxnRequest = {
+        sender: wallet?.walletAddress,
+        moduleAddress:
+          '0x4feceed8187cde99299ba0ad418412a7d84e54b70bdc4efe756067ca0c3f9c9a',
+        moduleName: 'token',
+        functionName: 'send',
+        typeArgs: [tokenType],
+        args: [receiver, amount],
+        chainId,
+      };
+
+      const rawTxnBase64: string = await sdk.createRawTransactionBuffer(
+        rawTxnRequest,
+        RawTxnFormat.aptos
+      );
+
+      console.log('Raw Transaction from website:', rawTxnBase64);
+
+      // Send to wallet
+      const response: RawTransactionResponse =
+        await sdk.signAndSendRawTransaction({
+          rawTxn: rawTxnBase64,
+          chainId,
+          format: RawTxnFormat.aptos,
           meta: {
             description: 'Send tokens',
           },
@@ -338,7 +401,15 @@ const Ribbit = () => {
               className="demo-button transaction"
               disabled={!isConnected}
             >
-              🚀 Send Transaction
+              🚀 Send Transaction with aptos sdk
+            </button>
+
+            <button
+              onClick={sendTransactionWithSupra}
+              className="demo-button transaction"
+              disabled={!isConnected}
+            >
+              🚀 Send Transaction with supra sdk
             </button>
           </div>
 
