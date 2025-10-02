@@ -171,10 +171,12 @@ const Ribbit = () => {
       }
       addLog('🚀 Sending transaction...');
       const chainId = SupraChainId.TESTNET;
+
       const receiver = new HexString(
         '0xcd57ba74df68ceea6c46b0e30ac77204bd043d1f57b92384c8d42acb9ed63184'
       ).toUint8Array();
-      const amount = BCSSupra.bcsSerializeUint64(BigInt(100000000)); // 1 SUPRA = 100,000,000 microSUPRA
+      const amount = BCSSupra.bcsSerializeUint64(BigInt(1000000));
+
       const tokenType = '0x1::supra_coin::SupraCoin';
 
       const rawTxnRequest: RawTxnRequest = {
@@ -193,7 +195,6 @@ const Ribbit = () => {
       );
 
       console.log('Raw Transaction from website:', rawTxnBase64);
-
       // Send to wallet
       const response: RawTransactionResponse =
         await sdk.signAndSendRawTransaction({
