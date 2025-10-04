@@ -15,7 +15,7 @@ import {
   RawTxnFormat,
 } from 'ribbit-wallet-connect';
 
-import { BCS as BCSSupra, HexString, TxnBuilderTypes } from 'supra-l1-sdk-core';
+import { BCS as BCSSupra, HexString } from 'supra-l1-sdk-core';
 
 const Ribbit = () => {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
