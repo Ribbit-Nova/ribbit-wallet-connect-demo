@@ -15,7 +15,7 @@ import {
   RawTxnFormat,
 } from 'ribbit-wallet-connect';
 
-import { BCS as BCSSupra, HexString } from 'supra-l1-sdk-core';
+import { BCS as BCSSupra, HexString, TxnBuilderTypes } from 'supra-l1-sdk-core';
 
 const Ribbit = () => {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
@@ -175,9 +175,61 @@ const Ribbit = () => {
       const receiver = new HexString(
         '0xcd57ba74df68ceea6c46b0e30ac77204bd043d1f57b92384c8d42acb9ed63184'
       ).toUint8Array();
+
+      // const obj = {
+      //   0: 252,
+      //   1: 11,
+      //   2: 161,
+      //   3: 233,
+      //   4: 236,
+      //   5: 176,
+      //   6: 58,
+      //   7: 208,
+      //   8: 35,
+      //   9: 16,
+      //   10: 24,
+      //   11: 232,
+      //   12: 51,
+      //   13: 59,
+      //   14: 183,
+      //   15: 176,
+      //   16: 209,
+      //   17: 192,
+      //   18: 66,
+      //   19: 25,
+      //   20: 140,
+      //   21: 79,
+      //   22: 24,
+      //   23: 229,
+      //   24: 246,
+      //   25: 59,
+      //   26: 205,
+      //   27: 189,
+      //   28: 172,
+      //   29: 240,
+      //   30: 233,
+      //   31: 164,
+      // };
+      // const u8 = Uint8Array.from(Object.values(obj));
+      // const hexAddress = HexString.fromUint8Array(u8).toString();
+      // const receiver = new HexString(hexAddress).toUint8Array();
+      // const amount = BCSSupra.bcsToBytes(
+      //   new TxnBuilderTypes.Identifier('Nekora')
+      // );
       const amount = BCSSupra.bcsSerializeUint64(BigInt(1000000));
 
       const tokenType = '0x1::supra_coin::SupraCoin';
+
+      // const rawTxnRequest: RawTxnRequest = {
+      //   sender: wallet?.walletAddress,
+      //   moduleAddress:
+      //     '0xfd566b048d7ea241ebd4d28a3d60a9eaaaa29a718dfff52f2ff4ca8581363b85',
+      //   moduleName: 'BlindBoxContract_Crystara_TestV17',
+      //   functionName: 'purchase_lootbox',
+      //   typeArgs: [tokenType],
+      //   args: [receiver, amount],
+      //   chainId,
+      // };
 
       const rawTxnRequest: RawTxnRequest = {
         sender: wallet?.walletAddress,
